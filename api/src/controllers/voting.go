@@ -31,6 +31,7 @@ func CreateVote(w http.ResponseWriter, r *http.Request){
 	}
 
 	if err = vote.Validation(); err != nil {
+		fmt.Printf("%d", err)
 		json.NewEncoder(w).Encode(err)
 		return
 	}
