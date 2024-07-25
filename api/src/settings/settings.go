@@ -33,11 +33,12 @@ func LoadSettings(){
 		log.Fatal(erro)
 	}
 
-	DbConnectionString = fmt.Sprintf("mongodb://%s:%s@%s:%s", 
+	DbConnectionString = fmt.Sprintf("mongodb://%s:%s@%s:%s/?authSource=%s", 
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASS"),
 		os.Getenv("DB_SERVER"),
 		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
 	)
 
 	DbName = os.Getenv("DB_NAME")

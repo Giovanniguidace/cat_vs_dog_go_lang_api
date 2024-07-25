@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"api/src/database"
 	"api/src/models"
-	_ "api/src/services"
+	"api/src/repositories"
+	"api/src/responses"
+	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	_ "strconv"
@@ -13,28 +15,38 @@ import (
 )
 
 // CreateVote receive data voting and create - 1 for cat or 2 for dog
-func CreateVote(w http.ResponseWriter, r *http.Request){
+func CreateVote(w http.ResponseWriter, r *http.Request) {
 	parameters, err := io.ReadAll(r.Body)
-
-	w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusCreated)
-
 	if err != nil {
-		json.NewEncoder(w).Encode(err)
+		responses.ErrorMessage(w, http.StatusUnprocessableEntity, err)
+		return
 	}
 
 	var vote models.Vote
 
-	if err = json.Unmarshal(parameters, &vote); err != nil{
-		json.NewEncoder(w).Encode(err)
+	if err = json.Unmarshal(parameters, &vote); err != nil {
+		responses.ErrorMessage(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if err = vote.Validation(); err != nil {
-		fmt.Printf("%d", err)
-		json.NewEncoder(w).Encode(err)
+		responses.ErrorMessage(w, http.StatusBadRequest, err)
 		return
 	}
 
-	fmt.Println(vote.VoteId)
+	mongo_client, err := database.MongoConnect()
+
+	if err != nil {
+		responses.ErrorMessage(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer mongo_client.Disconnect(context.TODO())
+
+	_, err = repositories.InsertVote(vote, mongo_client)
+	if err != nil {
+		responses.ErrorMessage(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.SuccessMessage(w, http.StatusCreated, "vote created with success")
 }

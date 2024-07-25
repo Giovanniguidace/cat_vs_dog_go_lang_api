@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"time"
+
 )
 
 type Vote struct{
@@ -11,10 +12,11 @@ type Vote struct{
 }
 
 
+// Validation check and validate returned values.
 func (vote *Vote) Validation() error {
 
 	if vote.VoteId != 1 && vote.VoteId != 2 {
-		return errors.New("Vote Id must be 1 to vote in Cat or 2 to vote in Dog")
+		return errors.New("invalid field name or value")
 	}
 
 	return nil
